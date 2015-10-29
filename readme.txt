@@ -19,6 +19,7 @@ Based on the Restrict Categories plugin, this plugin allows you to restrict the 
 1. Upload the restrict-taxonomies folder to to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Configure the plugin in Settings > Restrict Taxonomies
+1. Choose the taxonomies *AND* the corresponding post types
 
 == Frequently Asked Questions ==
 
