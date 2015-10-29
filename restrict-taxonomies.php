@@ -66,12 +66,12 @@ class RestrictCategories{
 	public function init() {
 		register_setting( 'RestrictTaxs_options_group', 'RestrictTaxs_options', array( &$this, 'options_sanitize' ) );
 		register_setting( 'RestrictTaxs_user_options_group', 'RestrictTaxs_user_options', array( &$this, 'options_sanitize' ) );
-		register_setting( 'RestrictTaxs_post_types_group', 'RestrictTaxs_post_type_options', array( &$this, 'options_sanitize' ) );
 
 		// Set the options to a variable
 		add_option( 'RestrictTaxs_options' );
 		add_option( 'RestrictTaxs_user_options' );
 		add_option( 'RestrictTaxs_post_type_options' );
+		register_setting( 'RestrictTaxs_post_types_group', 'RestrictTaxs_post_type_options', array( &$this, 'options_sanitize' ) );
 
 		$post_type_options = get_option( 'RestrictTaxs_post_type_options' );
 		//Default CPT options
