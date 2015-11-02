@@ -4,7 +4,7 @@ Plugin Name: Restrict Taxonomies
 Description: Based on Restrict Categories, restrict the taxonomies terms that users can view, add, and edit in the admin panel.
 Author: Sladix
 Author URI: https://twitter.com/sladix
-Version: 1.0
+Version: 1.1
 */
 
 /*
@@ -32,6 +32,7 @@ class RestrictCategories{
 
 	public function __construct(){
 		// Make sure we are in the admin before proceeding.
+		$frontOptions = get_option('RestrictTaxs_general_options');
 		if ( is_admin() ) {
 			$post_type = $this->get_current_post_type();
 
@@ -50,11 +51,57 @@ class RestrictCategories{
 			add_filter( 'screen_settings', array( &$this, 'add_screen_options' ) );
 
 			add_action( 'admin_notices', array( &$this, 'admin_notices' ) );
+
+			register_deactivation_hook( __FILE__ , array( &$this, 'desactivate' ) );
+			register_activation_hook( __FILE__ , array( &$this, 'activate' ) );
+		}elseif($frontOptions['frontend'])
+		{
+			//Front
+			add_action( 'init', array( &$this, 'posts' ) );
 		}
 
 		// Make sure XML-RPC requests are filtered to match settings
 		if ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
 			add_action( 'xmlrpc_call', array( &$this, 'posts' ) );
+	}
+
+
+	/**
+	 * Delete the options from database
+	 *
+	 * @since 1.0
+	 * @uses delete_option()
+	 */
+	function desactivate(){
+		unregister_setting( 'RestrictTaxs_options', 'RestrictTaxs_options', array( &$this, 'options_sanitize' ) );
+		unregister_setting( 'RestrictTaxs_general_options', 'RestrictTaxs_general_options', array( &$this, 'options_sanitize' ) );
+		unregister_setting( 'RestrictTaxs_user_options', 'RestrictTaxs_user_options', array( &$this, 'options_sanitize' ) );
+		unregister_setting( 'RestrictTaxs_post_type_options', 'RestrictTaxs_post_type_options', array( &$this, 'options_sanitize' ) );
+	}
+
+	/**
+	 * Register the options and option group
+	 *
+	 * @since 1.0
+	 * @uses delete_option()
+	 */
+	function activate(){
+		if(false === get_option('RestrictTaxs_post_type_options'))
+		{
+			//Default CPT options
+			$defaultsPt = array(
+				'post_types'	=>	array('post'),
+				'taxonomies'	=>	array('category')
+			);
+			update_option( 'RestrictTaxs_post_type_options',$defaultsPt);
+		}
+		if(false === get_option('RestrictTaxs_general_options')){
+			//Default CPT options
+			$defaults = array(
+				'frontent'	=>	false
+			);
+			update_option( 'RestrictTaxs_post_type_options',$defaults);
+		}
 	}
 
 	/**
@@ -64,24 +111,11 @@ class RestrictCategories{
 	 * @uses register_setting() Register a setting in the database
 	 */
 	public function init() {
-		register_setting( 'RestrictTaxs_options_group', 'RestrictTaxs_options', array( &$this, 'options_sanitize' ) );
-		register_setting( 'RestrictTaxs_user_options_group', 'RestrictTaxs_user_options', array( &$this, 'options_sanitize' ) );
 
-		// Set the options to a variable
-		add_option( 'RestrictTaxs_options' );
-		add_option( 'RestrictTaxs_user_options' );
-		add_option( 'RestrictTaxs_post_type_options' );
-		register_setting( 'RestrictTaxs_post_types_group', 'RestrictTaxs_post_type_options', array( &$this, 'options_sanitize' ) );
-
-		$post_type_options = get_option( 'RestrictTaxs_post_type_options' );
-		//Default CPT options
-		$defaultsPt = array(
-			'post_types'		=>	array('post'),
-			'taxonomies'	=>	array('category')
-		);
-
-		if ( !is_array($post_type_options) )
-			update_option( 'RestrictTaxs_post_type_options', $defaultsPt );
+		register_setting( 'RestrictTaxs_options', 'RestrictTaxs_options', array( &$this, 'options_sanitize' ) );
+		register_setting( 'RestrictTaxs_general_options', 'RestrictTaxs_general_options', array( &$this, 'options_sanitize' ) );
+		register_setting( 'RestrictTaxs_user_options', 'RestrictTaxs_user_options', array( &$this, 'options_sanitize' ) );
+		register_setting( 'RestrictTaxs_post_type_options', 'RestrictTaxs_post_type_options', array( &$this, 'options_sanitize' ) );
 
 		$screen_options = get_option( 'RestrictTaxs-screen-options' );
 
@@ -122,6 +156,11 @@ class RestrictCategories{
 			if ( ! wp_verify_nonce( $nonce, 'rc-reset-nonce' ) )
 				wp_die( __( 'Security check', 'restrict-taxonomies' ) );
 
+			//Default CPT options
+			$defaultsPt = array(
+				'post_types'	=>	array('post'),
+				'taxonomies'	=>	array('category')
+			);
 			// Reset Roles and Users options
 			update_option( 'RestrictTaxs_options', array() );
 			update_option( 'RestrictTaxs_user_options', array() );
@@ -203,7 +242,15 @@ class RestrictCategories{
 
 		$roles 	= $this->get_roles();
 		// $cats 	= $this->get_cats();
-
+		$fo = get_option('RestrictTaxs_general_options');
+		if($fo['frontend'])
+		{
+			$rc_options[] = array(
+				'name'      => 'Non logged users',
+				'id'        => "non_logged_cats"
+				// 'options'   => $cats
+			);
+		}
 		foreach ( $roles as $name => $id ) {
 			$rc_options[] = array(
 				'name'      => $name,
@@ -317,10 +364,10 @@ class RestrictCategories{
 			return;
 		switch($_REQUEST['option_page'])
 		{
-			case 'RestrictTaxs_user_options_group' :
+			case 'RestrictTaxs_user_options' :
 				$options = get_option( 'RestrictTaxs_user_options' );
 				break;
-			case 'RestrictTaxs_options_group' :
+			case 'RestrictTaxs_options' :
 				$options = get_option( 'RestrictTaxs_options' );
 				break;
 			default :
@@ -377,7 +424,7 @@ class RestrictCategories{
 		<div class="wrap">
 			<h2>
 			<?php
-				_e('Restrict Categories', 'restrict-taxonomies');
+				_e('Restrict Taxonomies', 'restrict-taxonomies');
 
 				// If searched, output the query
 				if ( isset( $_REQUEST['rc-search'] ) && !empty( $_REQUEST['rc-search'] ) ) {
@@ -389,31 +436,38 @@ class RestrictCategories{
 			<h3><?php _e('Post types and Taxonomy Settings', 'restrict-taxonomies'); ?></h3>
 			<?php $options = get_option('RestrictTaxs_post_type_options'); ?>
 			<form method="post" action="options.php">
-				<?php settings_fields( 'RestrictTaxs_post_types_group' ); ?>
+				<?php settings_fields( 'RestrictTaxs_post_type_options' ); ?>
 				<h4>Custom post Types to handle</h4>
                 <fieldset>
                     <?php
                         $pts = get_post_types( array('public'=>true,'_builtin'=>false), 'objects');
                         $isposts = false;
                         foreach ($pts as $cpt): ?>
-                        	<label><?php echo $cpt->labels->menu_name ?> <input type="checkbox" name="RestrictTaxs_post_type_options[post_types][]" value="<?php echo $cpt->name ?>" <?php if(in_array($cpt->name,$options['post_types'])){echo "checked";} ?>> </label>
+                        	<label><input type="checkbox" name="RestrictTaxs_post_type_options[post_types][]" value="<?php echo $cpt->name ?>" <?php if(in_array($cpt->name,$options['post_types'])){echo "checked";} ?>><?php echo $cpt->labels->menu_name ?> </label>
                         	<?php if($cpt->name == 'post'){$isposts = true;} ?>
                         <?php endforeach;
                     ?>
                     <?php if (!$isposts): ?>
-                    	<label><?php _e('Posts','restrict-taxonomies') ?> <input type="checkbox" name="RestrictTaxs_post_type_options[post_types][]" value="category" <?php if(in_array("post",$options['post_types'])){echo "checked";} ?>> </label>	
+                    	<label><input type="checkbox" name="RestrictTaxs_post_type_options[post_types][]" value="post" <?php if(in_array("post",$options['post_types'])){echo "checked";} ?>><?php _e('Posts','restrict-taxonomies') ?> </label>	
                     <?php endif ?>
                     
                 <h4>Custom Taxonomies to handle</h4>
                     <?php
                         $cts = get_taxonomies(array('_builtin'=>false), 'objects'); ?>                       
                         <?php foreach ($cts as $ct): ?>
-                        	<label><?php echo $ct->labels->name ?> <input type="checkbox" name="RestrictTaxs_post_type_options[taxonomies][]" value="<?php echo $ct->name ?>" <?php if(in_array($ct->name,$options['taxonomies'])){echo "checked";} ?>> </label>
+                        	<label><input type="checkbox" name="RestrictTaxs_post_type_options[taxonomies][]" value="<?php echo $ct->name ?>" <?php if(in_array($ct->name,$options['taxonomies'])){echo "checked";} ?>><?php echo $ct->labels->name ?> </label>
                         <?php endforeach;
                     ?>
-                     <label><?php _e('Categories','restrict-taxonomies') ?> <input type="checkbox" name="RestrictTaxs_post_type_options[taxonomies][]" value="category" <?php if(in_array("category",$options['taxonomies'])){echo "checked";} ?>> </label>
+                     <label><input type="checkbox" name="RestrictTaxs_post_type_options[taxonomies][]" value="category" <?php if(in_array("category",$options['taxonomies'])){echo "checked";} ?>><?php _e('Categories','restrict-taxonomies') ?> </label>
                 </fieldset>
                 <?php submit_button(); ?>
+            </form>
+            <?php $frontOptions = get_option('RestrictTaxs_general_options'); ?>
+            <form method = "post" action="options.php">
+            		<?php settings_fields('RestrictTaxs_general_options'); ?>
+            		<h4>General options</h4>
+            		<label><input type="checkbox" name="RestrictTaxs_general_options[frontend]" value="1" <?php if($frontOptions['frontend']){echo "checked";} ?>> Front end restrictions</label>
+            		<?php submit_button(); ?>
             </form>
             <h2 class="nav-tab-wrapper">
             	<a href="<?php echo $roles_tab; ?>" class="nav-tab <?php echo ( $tab == 'roles' ) ? 'nav-tab-active' : ''; ?>"><?php _e( 'Roles', 'restrict-taxonomies' ); ?></a>
@@ -432,7 +486,7 @@ class RestrictCategories{
             	<form method="post" action="options.php">
 	                
 	                    <?php
-	                    	settings_fields( 'RestrictTaxs_options_group' );
+	                    	settings_fields( 'RestrictTaxs_options' );
 	                    	foreach ($options['taxonomies'] as $tax) {
 	                    		$t = get_taxonomy( $tax );
 	                    		echo "<fieldset>";
@@ -462,7 +516,7 @@ class RestrictCategories{
 
 				<form method="post" action="options.php">
 	                    <?php
-	                    	settings_fields( 'RestrictTaxs_user_options_group' );
+	                    	settings_fields( 'RestrictTaxs_user_options' );
 	                    	foreach ($options['taxonomies'] as $tax) {
 	                    		$t = get_taxonomy( $tax );
 	                    		echo "<fieldset>";
@@ -530,23 +584,33 @@ class RestrictCategories{
 		// Placeholder category (only used to ensure saving while paging works)
 		$defaults = array( 'RestrictCategoriesDefault' );
 
-		// Get the current user in the admin
-		$user = new WP_User( $current_user->ID );
+		if($current_user->ID == 0)
+		{
+			$settings = get_option( 'RestrictTaxs_options' );
+			$settings_user = array();
+			$user_cap = array('non_logged');
+		}else
+		{
 
-		// Get the user role
-		$user_cap = $user->roles;
+			// Get the current user in the admin
+			$user = new WP_User( $current_user->ID );
 
-		// Get the user login name/ID
-		if ( function_exists( 'get_users' ) )
-			$user_login = $user->user_nicename;
-		elseif ( function_exists( 'get_users_of_blog' ) )
-			$user_login = $user->ID;
+			// Get the user role
+			$user_cap = $user->roles;
 
-		// Get selected categories for Roles
-		$settings = get_option( 'RestrictTaxs_options' );
+			// Get the user login name/ID
+			if ( function_exists( 'get_users' ) )
+				$user_login = $user->user_nicename;
+			elseif ( function_exists( 'get_users_of_blog' ) )
+				$user_login = $user->ID;
 
-		// Get selected categories for Users
-		$settings_user = get_option( 'RestrictTaxs_user_options' );
+			// Get selected categories for Roles
+			$settings = get_option( 'RestrictTaxs_options' );
+
+			// Get selected categories for Users
+			$settings_user = get_option( 'RestrictTaxs_user_options' );
+		}
+		
 
 		// Get handled taxonomies
 		$options = get_option('RestrictTaxs_post_type_options');
@@ -614,18 +678,17 @@ class RestrictCategories{
 			return;
 
 		global $pagenow;
-
+		$frontOptions = get_option('RestrictTaxs_general_options');
 		// Only restrict the posts query if we're on the Posts screen
-		if ( $pagenow == 'edit.php' || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) )
+		if ( $pagenow == 'edit.php' || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) || $frontOptions['frontend'])
 			add_filter( 'pre_get_posts', array( &$this, 'posts_query' ) );
 
 		// Allowed pages for term exclusions
 		$pages = array( 'edit.php', 'post-new.php', 'post.php' );
 
 		$options = get_option('RestrictTaxs_post_type_options');
-
 		// Make sure to exclude terms from $pages array as well as the Category screen
-		if ( in_array( $pagenow, $pages ) || ( $pagenow == 'edit-tags.php' && in_array($_GET['taxonomy'],$options['taxonomies']) ) || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) )
+		if ($frontOptions['frontend'] || in_array( $pagenow, $pages ) || ( $pagenow == 'edit-tags.php' && in_array($_GET['taxonomy'],$options['taxonomies']) ) || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) )
 		{
 			add_filter( 'list_terms_exclusions', array( &$this, 'exclusions' ) );
 		}

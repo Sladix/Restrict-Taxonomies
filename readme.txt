@@ -1,10 +1,10 @@
-=== Restrict Categories ===
+=== Restrict Taxonomies ===
 Contributors: sladix, mmuro
 Tags: restrict, admin, administration, cms, categories, category, taxonomies, taxonomy
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=sladix%40gmail%2ecom&lc=FR&item_name=Sladix&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
 Requires at least: 3.1
 Tested up to: 4.3.1
-Stable tag: 1.0
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,7 +25,17 @@ Based on the Restrict Categories plugin, this plugin allows you to restrict the 
 
 None yet
 
+== Screenshots ==
+
+1. The settings are located in Settings > Restrict Taxonomies
+2. First choose the post types and the taxonomies to handle
+3. Select the categories allowed for a role or a user (note that user options override role options)
+4. Should the plugin restrict taxonomies in the front end ?
+
 == Changelog ==
 
+= 1.1 =
+* Added front end restrictions and settings
+
 = 1.0 =
-Initial release
+* Initial release
