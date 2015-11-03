@@ -43,7 +43,7 @@ class RestrictCategories{
 			$post_type_options = get_option('RestrictTaxs_post_type_options');
 
   			// If the page is the Posts screen, do our thing, otherwise chill
-			if ( $post_type == false || $post_type == 'post' || in_array($post_type,$post_type_options['post_types']) )
+			if ( $post_type == false || $post_type == 'post' ||  $post_type == 'page' || in_array($post_type,$post_type_options['post_types']) )
 				add_action( 'admin_init', array( &$this, 'posts' ) );
 
 			// Adds a Settings link to the Plugins page
