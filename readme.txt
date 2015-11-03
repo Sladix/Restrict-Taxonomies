@@ -4,7 +4,7 @@ Tags: restrict, admin, administration, cms, categories, category, taxonomies, ta
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=sladix%40gmail%2ecom&lc=FR&item_name=Sladix&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
 Requires at least: 3.1
 Tested up to: 4.3.1
-Stable tag: 1.1
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,7 +23,8 @@ Based on the Restrict Categories plugin, this plugin allows you to restrict the 
 
 == Frequently Asked Questions ==
 
-None yet
+*Does this plugin also works for page taxonomies ?*
+Yes, the page post type will always be handled, therefore, it doesn't appear in the post types and taxonomies settings
 
 == Screenshots ==
 
@@ -33,6 +34,9 @@ None yet
 4. Should the plugin restrict taxonomies in the front end ?
 
 == Changelog ==
+
+= 1.2 =
+* Added page taxonomies support
 
 = 1.1 =
 * Added front end restrictions and settings
