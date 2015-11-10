@@ -4,7 +4,7 @@ Plugin Name: Restrict Taxonomies
 Description: Based on Restrict Categories, restrict the taxonomies terms that users can view, add, and edit in the admin panel.
 Author: Sladix
 Author URI: https://twitter.com/sladix
-Version: 1.2
+Version: 1.2.5
 */
 
 /*
@@ -23,10 +23,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 // Instantiate new class
-$restrict_categories_load = new RestrictCategories();
+$restrict_categories_load = new RestrictTaxonomies();
 
 // Restrict Categories class
-class RestrictCategories{
+class RestrictTaxonomies{
 
 	private $cat_list = NULL;
 
@@ -95,12 +95,13 @@ class RestrictCategories{
 			);
 			update_option( 'RestrictTaxs_post_type_options',$defaultsPt);
 		}
+
 		if(false === get_option('RestrictTaxs_general_options')){
 			//Default CPT options
 			$defaults = array(
-				'frontent'	=>	false
+				'frontend'	=>	false
 			);
-			update_option( 'RestrictTaxs_post_type_options',$defaults);
+			update_option( 'RestrictTaxs_general_options',$defaults);
 		}
 	}
 
@@ -118,7 +119,7 @@ class RestrictCategories{
 		register_setting( 'RestrictTaxs_post_type_options', 'RestrictTaxs_post_type_options', array( &$this, 'options_sanitize' ) );
 
 		$screen_options = get_option( 'RestrictTaxs-screen-options' );
-
+		$this->activate();
 		// Default is 20 per page
 		$defaults = array(
 			'roles_per_page' => 20,
@@ -562,7 +563,7 @@ class RestrictCategories{
 	    return sanitize_key( $_REQUEST['post_type'] );
 
 	  //lastly check with the request post
-	  elseif (get_post_type($_REQUEST['post']))
+	  elseif (isset($_REQUEST['post']) && get_post_type($_REQUEST['post']))
 		return get_post_type($_REQUEST['post']);
 		
 	  //we do not know the post type!

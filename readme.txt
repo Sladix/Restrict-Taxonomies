@@ -35,6 +35,9 @@ Yes, the page post type will always be handled, therefore, it doesn't appear in 
 
 == Changelog ==
 
+= 1.2.5 =
+* Fixed warnings reported by @swinggraphics
+
 = 1.2 =
 * Added page taxonomies support
 
