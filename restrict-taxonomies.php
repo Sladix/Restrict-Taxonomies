@@ -4,7 +4,7 @@ Plugin Name: Restrict Taxonomies
 Description: Based on Restrict Categories, restrict the taxonomies terms that users can view, add, and edit in the admin panel.
 Author: Sladix
 Author URI: https://twitter.com/sladix
-Version: 1.2.5
+Version: 1.2.6
 */
 
 /*
@@ -54,7 +54,7 @@ class RestrictTaxonomies{
 
 			register_deactivation_hook( __FILE__ , array( &$this, 'desactivate' ) );
 			register_activation_hook( __FILE__ , array( &$this, 'activate' ) );
-		}elseif($frontOptions['frontend'])
+		}elseif(isset($frontOptions['frontend']) && $frontOptions['frontend'])
 		{
 			//Front
 			add_action( 'init', array( &$this, 'posts' ) );
@@ -244,7 +244,7 @@ class RestrictTaxonomies{
 		$roles 	= $this->get_roles();
 		// $cats 	= $this->get_cats();
 		$fo = get_option('RestrictTaxs_general_options');
-		if($fo['frontend'])
+		if(isset($fo['frontend']) && $fo['frontend'])
 		{
 			$rc_options[] = array(
 				'name'      => 'Non logged users',
@@ -467,7 +467,7 @@ class RestrictTaxonomies{
             <form method = "post" action="options.php">
             		<?php settings_fields('RestrictTaxs_general_options'); ?>
             		<h4>General options</h4>
-            		<label><input type="checkbox" name="RestrictTaxs_general_options[frontend]" value="1" <?php if($frontOptions['frontend']){echo "checked";} ?>> Front end restrictions</label>
+            		<label><input type="checkbox" name="RestrictTaxs_general_options[frontend]" value="1" <?php if(isset($frontOptions['frontend']) && $frontOptions['frontend']){echo "checked";} ?>> Front end restrictions</label>
             		<?php submit_button(); ?>
             </form>
             <h2 class="nav-tab-wrapper">

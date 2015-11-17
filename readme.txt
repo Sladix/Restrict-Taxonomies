@@ -4,7 +4,7 @@ Tags: restrict, admin, administration, cms, categories, category, taxonomies, ta
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=sladix%40gmail%2ecom&lc=FR&item_name=Sladix&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
 Requires at least: 3.1
 Tested up to: 4.3.1
-Stable tag: 1.2
+Stable tag: 1.2.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,9 @@ Yes, the page post type will always be handled, therefore, it doesn't appear in 
 4. Should the plugin restrict taxonomies in the front end ?
 
 == Changelog ==
+
+= 1.2.6 =
+* Fixed warnings for frontend options
 
 = 1.2.5 =
 * Fixed warnings reported by @swinggraphics
