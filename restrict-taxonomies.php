@@ -4,7 +4,7 @@ Plugin Name: Restrict Taxonomies
 Description: Based on Restrict Categories, restrict the taxonomies terms that users can view, add, and edit in the admin panel.
 Author: Sladix
 Author URI: https://twitter.com/sladix
-Version: 1.2.6
+Version: 1.2.8
 */
 
 /*
@@ -57,7 +57,7 @@ class RestrictTaxonomies{
 		}elseif(isset($frontOptions['frontend']) && $frontOptions['frontend'])
 		{
 			//Front
-			add_action( 'init', array( &$this, 'posts' ) );
+			add_action( 'pre_get_posts', array( &$this, 'posts' ) );
 		}
 
 		// Make sure XML-RPC requests are filtered to match settings
@@ -565,6 +565,15 @@ class RestrictTaxonomies{
 	  //lastly check with the request post
 	  elseif (isset($_REQUEST['post']) && get_post_type($_REQUEST['post']))
 		return get_post_type($_REQUEST['post']);
+
+	  //Dokan seller dashboard products creation
+	  if(function_exists('dokan_get_option'))
+	  {
+	  	$page_id = dokan_get_option( 'dashboard', 'dokan_pages' );
+		  if(is_page($page_id))
+		  	return 'product';
+	  }
+	  
 		
 	  //we do not know the post type!
 	  return 'post';
@@ -681,7 +690,7 @@ class RestrictTaxonomies{
 		global $pagenow;
 		$frontOptions = get_option('RestrictTaxs_general_options');
 		// Only restrict the posts query if we're on the Posts screen
-		if ( $pagenow == 'edit.php' || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) || $frontOptions['frontend'])
+		if ( $pagenow == 'edit.php' || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) || (isset($frontOptions['frontend']) && $frontOptions['frontend']))
 			add_filter( 'pre_get_posts', array( &$this, 'posts_query' ) );
 
 		// Allowed pages for term exclusions
@@ -689,7 +698,7 @@ class RestrictTaxonomies{
 
 		$options = get_option('RestrictTaxs_post_type_options');
 		// Make sure to exclude terms from $pages array as well as the Category screen
-		if ($frontOptions['frontend'] || in_array( $pagenow, $pages ) || ( $pagenow == 'edit-tags.php' && in_array($_GET['taxonomy'],$options['taxonomies']) ) || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) )
+		if ((isset($frontOptions['frontend']) && $frontOptions['frontend']) || in_array( $pagenow, $pages ) || ( $pagenow == 'edit-tags.php' && in_array($_GET['taxonomy'],$options['taxonomies']) ) || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) )
 		{
 			add_filter( 'list_terms_exclusions', array( &$this, 'exclusions' ) );
 		}
