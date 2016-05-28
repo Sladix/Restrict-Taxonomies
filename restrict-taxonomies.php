@@ -1054,10 +1054,10 @@ class RestrictTaxs_Walker_Category_Checklist extends Walker {
 		$output .= sprintf(
 			'<li id="%4$s-category-%1$d"><label class="selectit"><input value="%2$s" type="checkbox" name="%3$s[%4$s][]" %5$s %6$s /> %7$s</label>',
 			$category->term_id,
-			$category->id,
+			$category->term_id,
 			$options_name,
 			$admin,
-			checked( in_array( $category->id, $selected_cats ), true, false ),
+			checked( in_array( $category->term_id, $selected_cats ), true, false ),
 			( $disabled === true ? 'disabled="disabled"' : '' ),
 			esc_html( apply_filters( 'the_category', $category->name ) )
 		);
