@@ -115,7 +115,7 @@ class RestrictTaxonomies{
 
 		register_setting( 'RestrictTaxs_options', 'RestrictTaxs_options', array( &$this, 'options_sanitize' ) );
 		register_setting( 'RestrictTaxs_general_options', 'RestrictTaxs_general_options', array( &$this, 'options_sanitize' ) );
-		register_setting( 'RestrictTaxs_user_options', 'RestrictTaxs_user_options' );
+		register_setting( 'RestrictTaxs_user_options', 'RestrictTaxs_user_options', array( &$this, 'options_sanitize' ) );
 		register_setting( 'RestrictTaxs_post_type_options', 'RestrictTaxs_post_type_options', array( &$this, 'options_sanitize' ) );
 
 		$screen_options = get_option( 'RestrictTaxs-screen-options' );
@@ -626,7 +626,7 @@ class RestrictTaxonomies{
 			if ( is_array( $settings_user ) && is_array($settings_user[$taxonomy]) &&!empty( $settings_user[$taxonomy][ $user_login . '_user_cats' ] ) ) {
 				// Build the category list
 				foreach ($settings_user[$taxonomy][ $user_login . '_user_cats' ] as $category) {
-					$term_id = get_term_by( 'slug', $category, $taxonomy )->term_id;
+					$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
 
 					// If WPML is installed, return the translated ID
 					if ( function_exists( 'icl_object_id' ) )
@@ -634,8 +634,7 @@ class RestrictTaxonomies{
 
 					$this->cat_list[$taxonomy] .= $term_id . ',';
 				}
-
-
+				
 				$this->cat_filters( $this->cat_list[$taxonomy],$taxonomy );
 			}
 			else {
@@ -647,7 +646,7 @@ class RestrictTaxonomies{
 
 						// Build the category list
 						foreach ($settings[$taxonomy][ $key . '_cats' ] as $category) {
-							$term_id = get_term_by( 'slug', $category, $taxonomy )->term_id;
+							$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
 
 							// If WPML is installed, return the translated ID
 							if ( function_exists( 'icl_object_id' ) )
@@ -662,8 +661,6 @@ class RestrictTaxonomies{
 				}
 			}
 		}
-
-
 	}
 
 	/**
@@ -706,6 +703,7 @@ class RestrictTaxonomies{
 		if ( count($this->cat_list) > 0) {
 			// Make sure the posts are removed by default or if filter category is ran
 			$taxs = get_object_taxonomies( $this->get_current_post_type(), 'names' );
+
 			$taxquery = array(
 				'relation'	=>	'OR'
 			);
@@ -1078,12 +1076,11 @@ class RestrictTaxs_Walker_Category_Checklist extends Walker {
 			$taxonomy = 'category';
 
 		$output .= sprintf(
-			'<li id="%4$s-category-%1$d"><label class="selectit"><input value="%2$s" type="checkbox" name="%3$s[%4$s][]" %5$s %6$s /> %7$s</label>',
+			'<li id="%3$s-category-%1$d"><label class="selectit"><input value="%1$s" type="checkbox" name="%2$s[%3$s][]" %4$s %5$s /> %6$s</label>',
 			$category->term_id,
-			$category->slug,
 			$options_name,
 			$admin,
-			checked( in_array( $category->slug, $selected_cats ), true, false ),
+			checked( in_array( $category->term_id, $selected_cats ), true, false ),
 			( $disabled === true ? 'disabled="disabled"' : '' ),
 			esc_html( apply_filters( 'the_category', $category->name ) )
 		);
