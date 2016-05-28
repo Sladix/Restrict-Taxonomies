@@ -1052,8 +1052,7 @@ class RestrictTaxs_Walker_Category_Checklist extends Walker {
 			$taxonomy = 'category';
 
 		$output .= sprintf(
-			'<li id="%4$s-category-%1$d"><label class="selectit"><input value="%2$s" type="checkbox" name="%3$s[%4$s][]" %5$s %6$s /> %7$s</label>',
-			$category->term_id,
+			'<li id="%3$s-category-%1$d"><label class="selectit"><input value="%1$s" type="checkbox" name="%2$s[%3$s][]" %4$s %5$s /> %6$s</label>',
 			$category->term_id,
 			$options_name,
 			$admin,
