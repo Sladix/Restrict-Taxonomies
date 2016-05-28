@@ -336,8 +336,6 @@ class RestrictTaxonomies{
 	 */
 	public function options_sanitize( $input ){
 
-		if ( !isset( $_REQUEST['option_page'] ) )
-			return;
 		switch($_REQUEST['option_page'])
 		{
 			case 'RestrictTaxs_user_options' :
