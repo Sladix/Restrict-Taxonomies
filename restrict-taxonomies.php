@@ -210,27 +210,6 @@ class RestrictTaxonomies{
 	}
 
 	/**
-	 * Get all categories that will be used as options.
-	 *
-	 * @since 1.0
-	 * @uses get_categories() Returns an array of category objects matching the query parameters.
-	 * @return $cat array All category slugs.
-	 */
-	public function get_cats(){
-		$cat = array();
-		//Todo opts cpt
-		$categories = get_terms( 'categorie-actualites','hide_empty=0' );
-
-		foreach ( $categories as $category ) {
-			$cat[] = array(
-				'slug' => $category->slug
-			);
-		}
-
-		return $cat;
-	}
-
-	/**
 	 * Set up the options array which will output all roles with categories.
 	 *
 	 * @since 1.0
@@ -242,7 +221,6 @@ class RestrictTaxonomies{
 		$rc_options = array();
 
 		$roles 	= $this->get_roles();
-		// $cats 	= $this->get_cats();
 		$fo = get_option('RestrictTaxs_general_options');
 		if(isset($fo['frontend']) && $fo['frontend'])
 		{
@@ -267,14 +245,12 @@ class RestrictTaxonomies{
 	 *
 	 * @since 1.0
 	 * @uses get_logins() Returns an array of all user logins.
-	 * @uses get_cats() Returns an array of all categories.
 	 * @return $rc_user_options array Multidimensional array with options.
 	 */
 	public function populate_user_opts(){
 		$rc_user_options = array();
 
 		$logins	= $this->get_logins();
-		// $cats 	= $this->get_cats();
 
 		foreach ( $logins as $name => $id ) {
 			$rc_user_options[] = array(
@@ -638,7 +614,7 @@ class RestrictTaxonomies{
 			if ( is_array( $settings_user ) && is_array($settings_user[$taxonomy]) &&!empty( $settings_user[$taxonomy][ $user_login . '_user_cats' ] ) ) {
 				// Build the category list
 				foreach ($settings_user[$taxonomy][ $user_login . '_user_cats' ] as $category) {
-						$term_id = get_term_by( 'slug', $category, $taxonomy )->term_id;
+						$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
 
 						// If WPML is installed, return the translated ID
 						if ( function_exists( 'icl_object_id' ) )
@@ -659,7 +635,7 @@ class RestrictTaxonomies{
 
 						// Build the category list
 						foreach ($settings[$taxonomy][ $key . '_cats' ] as $category) {
-								$term_id = get_term_by( 'slug', $category, $taxonomy )->term_id;
+								$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
 
 								// If WPML is installed, return the translated ID
 								if ( function_exists( 'icl_object_id' ) )
@@ -1079,12 +1055,11 @@ class RestrictTaxs_Walker_Category_Checklist extends Walker {
 			$taxonomy = 'category';
 
 		$output .= sprintf(
-			'<li id="%4$s-category-%1$d"><label class="selectit"><input value="%2$s" type="checkbox" name="%3$s[%4$s][]" %5$s %6$s /> %7$s</label>',
+			'<li id="%3$s-category-%1$d"><label class="selectit"><input value="%1$s" type="checkbox" name="%2$s[%3$s][]" %4$s %5$s /> %6$s</label>',
 			$category->term_id,
-			$category->slug,
 			$options_name,
 			$admin,
-			checked( in_array( $category->slug, $selected_cats ), true, false ),
+			checked( in_array( $category->term_id, $selected_cats ), true, false ),
 			( $disabled === true ? 'disabled="disabled"' : '' ),
 			esc_html( apply_filters( 'the_category', $category->name ) )
 		);
