@@ -361,9 +361,9 @@ class RestrictTaxonomies{
 	 */
 	public function options_sanitize( $input ){
 
-		if ( !isset( $_REQUEST['option_page'] ) )
-			return;
-		switch($_REQUEST['option_page'])
+		$switch = ( isset( $_REQUEST['option_page'] ) ) ? $_REQUEST['option_page'] : null;
+
+		switch( $switch )
 		{
 			case 'RestrictTaxs_user_options' :
 				$options = get_option( 'RestrictTaxs_user_options' );
@@ -371,8 +371,11 @@ class RestrictTaxonomies{
 			case 'RestrictTaxs_options' :
 				$options = get_option( 'RestrictTaxs_options' );
 				break;
-			default :
+			case 'RestrictTaxs_post_type_options' :
 				$options = get_option( 'RestrictTaxs_post_type_options' );
+				break;
+			default :
+				$options = $input;
 				break;
 		}
 
