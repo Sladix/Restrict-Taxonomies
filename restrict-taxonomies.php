@@ -715,7 +715,17 @@ class RestrictTaxonomies{
 					);
 				}
 			}
-			$query->set( 'tax_query', $taxquery );
+
+			// Get original tax_query with AND relation
+			$combined_taxquery[] = array(
+				'relation' => 'AND',
+				$query->tax_query
+			);
+			
+			// Combine it with restritct-taxonomies tax_query
+			$combined_taxquery[] = $taxquery;
+			$query->set( 'tax_query', $combined_taxquery );
+			
 		}
 
 		return $query;
