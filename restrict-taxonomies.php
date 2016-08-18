@@ -712,7 +712,7 @@ class RestrictTaxonomies{
 					$larray = explode( ',', $this->cat_list[$taxonomy] );
 					$taxquery[] = array(
 						'taxonomy' => $taxonomy,
-						'field' => 'id',
+						'field' => 'term_id',
 						'terms' => $larray ,
 						'operator'=> 'IN'
 					);
