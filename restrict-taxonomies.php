@@ -4,7 +4,7 @@ Plugin Name: Restrict Taxonomies
 Description: Based on Restrict Categories, restrict the taxonomies terms that users can view, add, and edit in the admin panel.
 Author: Sladix
 Author URI: https://twitter.com/sladix
-Version: 1.2.8
+Version: 1.3.0
 */
 
 /*
@@ -42,7 +42,7 @@ class RestrictTaxonomies{
 
 			$post_type_options = get_option('RestrictTaxs_post_type_options');
 
-  			// If the page is the Posts screen, do our thing, otherwise chill
+			// If the page is the Posts screen, do our thing, otherwise chill
 			if ( $post_type == false || $post_type == 'post' ||  $post_type == 'page' || in_array($post_type,$post_type_options['post_types']) )
 				add_action( 'admin_init', array( &$this, 'posts' ) );
 
@@ -181,7 +181,7 @@ class RestrictTaxonomies{
 			switch( $_REQUEST['action'] ) :
 				case 'reset' :
 					echo '<div id="message" class="updated"><p>' . __( 'Restrict Categories reset' , 'restrict-taxonomies') . '</p></div>';
-				break;
+					break;
 			endswitch;
 
 		endif;
@@ -214,7 +214,6 @@ class RestrictTaxonomies{
 	 *
 	 * @since 1.0
 	 * @uses get_roles() Returns an array of all user roles.
-	 * @uses get_cats() Returns an array of all categories.
 	 * @return $rc_options array Multidimensional array with options.
 	 */
 	public function populate_opts(){
@@ -399,11 +398,11 @@ class RestrictTaxonomies{
 		// Setup links for Roles/Users tabs
 		$roles_tab = esc_url( admin_url( 'options-general.php?page=restrict-taxonomies' ) );
 		$users_tab = add_query_arg( 'type', 'users', $roles_tab );
-	?>
+		?>
 
 		<div class="wrap">
 			<h2>
-			<?php
+				<?php
 				_e('Restrict Taxonomies', 'restrict-taxonomies');
 
 				// If searched, output the query
@@ -411,151 +410,155 @@ class RestrictTaxonomies{
 					echo '<span class="subtitle">' . sprintf( __( 'Search results for "%s"' , 'restrict-taxonomies'), $_REQUEST['rc-search'] ) . '</span>';
 					echo sprintf( '<span class="subtitle"><a href="%1$s">%2$s</a></span>', $users_tab, __( 'View All Users', 'restrict-taxonomies' ) );
 				}
-			?>
+				?>
 			</h2>
 			<h3><?php _e('Post types and Taxonomy Settings', 'restrict-taxonomies'); ?></h3>
 			<?php $options = get_option('RestrictTaxs_post_type_options'); ?>
 			<form method="post" action="options.php">
 				<?php settings_fields( 'RestrictTaxs_post_type_options' ); ?>
 				<h4>Custom post Types to handle</h4>
-                <fieldset>
-                    <?php
-                        $pts = get_post_types( array('public'=>true,'_builtin'=>false), 'objects');
-                        $isposts = false;
-                        foreach ($pts as $cpt): ?>
-                        	<label><input type="checkbox" name="RestrictTaxs_post_type_options[post_types][]" value="<?php echo $cpt->name ?>" <?php if(in_array($cpt->name,$options['post_types'])){echo "checked";} ?>><?php echo $cpt->labels->menu_name ?> </label>
-                        	<?php if($cpt->name == 'post'){$isposts = true;} ?>
-                        <?php endforeach;
-                    ?>
-                    <?php if (!$isposts): ?>
-                    	<label><input type="checkbox" name="RestrictTaxs_post_type_options[post_types][]" value="post" <?php if(in_array("post",$options['post_types'])){echo "checked";} ?>><?php _e('Posts','restrict-taxonomies') ?> </label>	
-                    <?php endif ?>
-                    
-                <h4>Custom Taxonomies to handle</h4>
-                    <?php
-                        $cts = get_taxonomies(array('_builtin'=>false), 'objects'); ?>                       
-                        <?php foreach ($cts as $ct): ?>
-                        	<label><input type="checkbox" name="RestrictTaxs_post_type_options[taxonomies][]" value="<?php echo $ct->name ?>" <?php if(in_array($ct->name,$options['taxonomies'])){echo "checked";} ?>><?php echo $ct->labels->name ?> </label>
-                        <?php endforeach;
-                    ?>
-                     <label><input type="checkbox" name="RestrictTaxs_post_type_options[taxonomies][]" value="category" <?php if(in_array("category",$options['taxonomies'])){echo "checked";} ?>><?php _e('Categories','restrict-taxonomies') ?> </label>
-                </fieldset>
-                <?php submit_button(); ?>
-            </form>
-            <?php $frontOptions = get_option('RestrictTaxs_general_options'); ?>
-            <form method = "post" action="options.php">
-            		<?php settings_fields('RestrictTaxs_general_options'); ?>
-            		<h4>General options</h4>
-            		<label><input type="checkbox" name="RestrictTaxs_general_options[frontend]" value="1" <?php if(isset($frontOptions['frontend']) && $frontOptions['frontend']){echo "checked";} ?>> Front end restrictions</label>
-            		<?php submit_button(); ?>
-            </form>
-            <h2 class="nav-tab-wrapper">
-            	<a href="<?php echo $roles_tab; ?>" class="nav-tab <?php echo ( $tab == 'roles' ) ? 'nav-tab-active' : ''; ?>"><?php _e( 'Roles', 'restrict-taxonomies' ); ?></a>
-                <a href="<?php echo $users_tab; ?>" class="nav-tab <?php echo ( $tab == 'users' ) ? 'nav-tab-active' : ''; ?>"><?php _e( 'Users', 'restrict-taxonomies' ); ?></a>
-            </h2>
+				<fieldset>
+					<?php
+					$pts = get_post_types( array('public'=>true,'_builtin'=>false), 'objects');
+					$isposts = false;
+					foreach ($pts as $cpt): ?>
+						<label><input type="checkbox" name="RestrictTaxs_post_type_options[post_types][]" value="<?php echo $cpt->name ?>" <?php if(in_array($cpt->name,$options['post_types'])){echo "checked";} ?>><?php echo $cpt->labels->menu_name ?> </label>
+						<?php if($cpt->name == 'post'){$isposts = true;} ?>
+					<?php endforeach;
+					?>
+					<?php if (!$isposts): ?>
+						<label><input type="checkbox" name="RestrictTaxs_post_type_options[post_types][]" value="post" <?php if(in_array("post",$options['post_types'])){echo "checked";} ?>><?php _e('Posts','restrict-taxonomies') ?> </label>
+					<?php endif ?>
+
+					<h4>Custom Taxonomies to handle</h4>
+					<?php
+					$cts = get_taxonomies(array('_builtin'=>false), 'objects'); ?>
+					<?php foreach ($cts as $ct): ?>
+						<label><input type="checkbox" name="RestrictTaxs_post_type_options[taxonomies][]" value="<?php echo $ct->name ?>" <?php if(in_array($ct->name,$options['taxonomies'])){echo "checked";} ?>><?php echo $ct->labels->name ?> </label>
+					<?php endforeach;
+					?>
+					<label><input type="checkbox" name="RestrictTaxs_post_type_options[taxonomies][]" value="category" <?php if(in_array("category",$options['taxonomies'])){echo "checked";} ?>><?php _e('Categories','restrict-taxonomies') ?> </label>
+				</fieldset>
+				<?php submit_button(); ?>
+			</form>
+			<?php $frontOptions = get_option('RestrictTaxs_general_options'); ?>
+			<form method = "post" action="options.php">
+				<?php settings_fields('RestrictTaxs_general_options'); ?>
+				<h4>General options</h4>
+				<label><input type="checkbox" name="RestrictTaxs_general_options[frontend]" value="1" <?php if(isset($frontOptions['frontend']) && $frontOptions['frontend']){echo "checked";} ?>> Front end restrictions</label>
+				<?php submit_button(); ?>
+			</form>
+			<h2 class="nav-tab-wrapper">
+				<a href="<?php echo $roles_tab; ?>" class="nav-tab <?php echo ( $tab == 'roles' ) ? 'nav-tab-active' : ''; ?>"><?php _e( 'Roles', 'restrict-taxonomies' ); ?></a>
+				<a href="<?php echo $users_tab; ?>" class="nav-tab <?php echo ( $tab == 'users' ) ? 'nav-tab-active' : ''; ?>"><?php _e( 'Users', 'restrict-taxonomies' ); ?></a>
+			</h2>
 
 			<?php
-                // Create a new instance of our user/roles boxes class
-                $boxes = new RestrictTaxs_User_Role_Boxes();
+			// Create a new instance of our user/roles boxes class
+			$boxes = new RestrictTaxs_User_Role_Boxes();
 
-                if ( $tab == 'roles' ) :
+			if ( $tab == 'roles' ) :
 
-                	$rc_options = $this->populate_opts();
+				$rc_options = $this->populate_opts();
 
-            ?>
-            	<form method="post" action="options.php">
-	                
-	                    <?php
-	                    	settings_fields( 'RestrictTaxs_options' );
-	                    	foreach ($options['taxonomies'] as $tax) {
-	                    		$t = get_taxonomy( $tax );
-	                    		echo "<fieldset>";
-		                    		echo "<h3>".$t->labels->name."</h3>";
-		                    		// Create boxes for Roles
-		                        	$boxes->start_box( get_option( 'RestrictTaxs_options' ), $rc_options, 'RestrictTaxs_options['.$tax.']', $tax );
-	                        	echo "</fieldset>";
-	                    	}
-	                    ?>
-	                
-	                <?php submit_button(); ?>
-            	</form>
-			<?php
-				elseif ( $tab == 'users' ) :
+				?>
+				<form method="post" action="options.php">
 
-					$rc_user_options = $this->populate_user_opts();
-            ?>
-            	<form method="post" action="options-general.php?page=restrict-taxonomies&type=users">
-            		<fieldset>
+					<?php
+					settings_fields( 'RestrictTaxs_options' );
+					foreach ($options['taxonomies'] as $tax) {
+						$t = get_taxonomy( $tax );
+						echo "<fieldset>";
+						echo "<h3>".$t->labels->name."</h3>";
+						// Create boxes for Roles
+						$boxes->start_box( get_option( 'RestrictTaxs_options' ), $rc_options, 'RestrictTaxs_options['.$tax.']', $tax );
+						echo "</fieldset>";
+					}
+					?>
+
+					<?php submit_button(); ?>
+				</form>
+				<?php
+			elseif ( $tab == 'users' ) :
+
+				$rc_user_options = $this->populate_user_opts();
+				?>
+				<form method="post" action="options-general.php?page=restrict-taxonomies&type=users">
+					<fieldset>
 						<p style="float: left; margin-top:8px;">Selecting categories for a user will <em>override</em> the categories you have chosen for that user's role.</p>
 						<p style="float:right; margin-top:8px;">
 							<input type="search" id="rc-search-users" name="rc-search" value="">
 							<?php submit_button( __( 'Search Users', 'restrict-taxonomies' ), 'secondary', 'rc-search-users', false ); ?>
 						</p>
-            		</fieldset>
+					</fieldset>
 				</form>
 
 				<form method="post" action="options.php">
-	                    <?php
-	                    	settings_fields( 'RestrictTaxs_user_options' );
-	                    	foreach ($options['taxonomies'] as $tax) {
-	                    		$t = get_taxonomy( $tax );
-	                    		echo "<fieldset>";
-                    				echo "<h3>".$t->labels->name."</h3>";
-	                        		// Create boxes for Users
-	                        		$boxes->start_box( get_option( 'RestrictTaxs_user_options' ), $rc_user_options, 'RestrictTaxs_user_options['.$tax.']',$tax );
-	                        	echo "</fieldset>";
-	                        }
-	                    ?>
-	                <?php submit_button(); ?>
-                </form>
-                <?php endif; ?>
+					<?php
+					settings_fields( 'RestrictTaxs_user_options' );
+					foreach ($options['taxonomies'] as $tax) {
+						$t = get_taxonomy( $tax );
+						echo "<fieldset>";
+						echo "<h3>".$t->labels->name."</h3>";
+						// Create boxes for Users
+						$boxes->start_box( get_option( 'RestrictTaxs_user_options' ), $rc_user_options, 'RestrictTaxs_user_options['.$tax.']',$tax );
+						echo "</fieldset>";
+					}
+					?>
+					<?php submit_button(); ?>
+				</form>
+			<?php endif; ?>
 
-            <h3><?php _e('Reset to Default Settings', 'restrict-taxonomies'); ?></h3>
+			<h3><?php _e('Reset to Default Settings', 'restrict-taxonomies'); ?></h3>
 			<p><?php _e('This option will reset all changes you have made to the default configuration.  <strong>You cannot undo this process</strong>.', 'restrict-taxonomies'); ?></p>
 			<form method="post">
 				<?php submit_button( __( 'Reset', 'restrict-taxonomies' ), 'secondary', 'reset' ); ?>
-                <input type="hidden" name="action" value="reset" />
-                <?php wp_nonce_field( 'rc-reset-nonce' ); ?>
+				<input type="hidden" name="action" value="reset" />
+				<?php wp_nonce_field( 'rc-reset-nonce' ); ?>
 			</form>
 		</div>
-	<?php
+		<?php
 
 	}
 
 	private function get_current_post_type() {
-	  global $post, $typenow, $current_screen;
-		
-	  //we have a post so we can just get the post type from that
-	  if ( $post && $post->post_type )
-	    return $post->post_type;
-	    
-	  //check the global $typenow - set in admin.php
-	  elseif( $typenow )
-	    return $typenow;
-	    
-	  //check the global $current_screen object - set in sceen.php
-	  elseif( $current_screen && $current_screen->post_type )
-	    return $current_screen->post_type;
-	  
-	  //check the post_type querystring
-	  elseif( isset( $_REQUEST['post_type'] ) )
-	    return sanitize_key( $_REQUEST['post_type'] );
+		global $post, $typenow, $current_screen, $wp_query;
 
-	  //lastly check with the request post
-	  elseif (isset($_REQUEST['post']) && get_post_type($_REQUEST['post']))
-		return get_post_type($_REQUEST['post']);
+		//we have a post so we can just get the post type from that
+		if ( $post && $post->post_type )
+			return $post->post_type;
 
-	  //Dokan seller dashboard products creation
-	  if(function_exists('dokan_get_option'))
-	  {
-	  	$page_id = dokan_get_option( 'dashboard', 'dokan_pages' );
-		  if(is_page($page_id))
-		  	return 'product';
-	  }
-	  
-		
-	  //we do not know the post type!
-	  return 'post';
+		//check the global $typenow - set in admin.php
+		elseif( $typenow )
+			return $typenow;
+
+		//check the global $current_screen object - set in screen.php
+		elseif( $current_screen && $current_screen->post_type )
+			return $current_screen->post_type;
+
+		//check the post_type querystring
+		elseif( isset( $_REQUEST['post_type'] ) )
+			return sanitize_key( $_REQUEST['post_type'] );
+
+		//lastly check with the request post
+		elseif (isset($_REQUEST['post']) && get_post_type($_REQUEST['post']))
+			return get_post_type($_REQUEST['post']);
+
+		//Dokan seller dashboard products creation
+		if(function_exists('dokan_get_option'))
+		{
+			$page_id = dokan_get_option( 'dashboard', 'dokan_pages' );
+			if(is_page($page_id))
+				return 'product';
+		}
+		//Geo dir post type
+		if(isset($wp_query->query_vars['gd_is_geodir_page']))
+			return 'gd_place';
+
+		if(isset($wp_query->query_vars['post_type']))
+			return $wp_query->query_vars['post_type'];
+		//we do not know the post type!
+		return 'post';
 	}
 
 	/**
@@ -576,7 +579,7 @@ class RestrictTaxonomies{
 		if($current_user->ID == 0)
 		{
 			$settings = get_option( 'RestrictTaxs_options' );
-			$settings_user = array();
+			$settings_user = '';
 			$user_cap = array('non_logged');
 		}else
 		{
@@ -599,32 +602,40 @@ class RestrictTaxonomies{
 			// Get selected categories for Users
 			$settings_user = get_option( 'RestrictTaxs_user_options' );
 		}
-		
+
 
 		// Get handled taxonomies
 		$options = get_option('RestrictTaxs_post_type_options');
+		if(!is_array($options))
+		{
+			$options = array(
+				'post_types'	=>	array(),
+				'taxonomies'	=>	array()
+			);
+		}
 		$taxs = get_object_taxonomies( $this->get_current_post_type(), 'names' );
 		$lestax = array_intersect($taxs, $options['taxonomies']);
+		$this->cat_list = array();
 		foreach ($lestax as $taxonomy) {
 			// For users, strip out the placeholder category, which is only used to make sure the checkboxes work
 			if ( is_array( $settings_user ) && array_key_exists( $taxonomy, $settings_user ) )
 				$settings_user[$taxonomy][ $user_login . '_user_cats' ] = array_values( array_diff( $settings_user[$taxonomy][ $user_login . '_user_cats' ], $defaults ) );
-
+			if(!isset($this->cat_list[$taxonomy]))
+				$this->cat_list[$taxonomy] = '';
 			// Selected categories for User overwrites Roles selection
 			if ( is_array( $settings_user ) && is_array($settings_user[$taxonomy]) &&!empty( $settings_user[$taxonomy][ $user_login . '_user_cats' ] ) ) {
 				// Build the category list
 				foreach ($settings_user[$taxonomy][ $user_login . '_user_cats' ] as $category) {
-						$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
+					$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
 
-						// If WPML is installed, return the translated ID
-						if ( function_exists( 'icl_object_id' ) )
-							$term_id = icl_object_id( $term_id, $taxonomy, true );
+					// If WPML is installed, return the translated ID
+					if ( function_exists( 'icl_object_id' ) )
+						$term_id = icl_object_id( $term_id, $taxonomy, true );
 
-						$this->cat_list .= $term_id . ',';
+					$this->cat_list[$taxonomy] .= $term_id . ',';
 				}
 				
-
-				$this->cat_filters( $this->cat_list );
+				$this->cat_filters( $this->cat_list[$taxonomy],$taxonomy );
 			}
 			else {
 				foreach ( $user_cap as $key ) {
@@ -635,22 +646,21 @@ class RestrictTaxonomies{
 
 						// Build the category list
 						foreach ($settings[$taxonomy][ $key . '_cats' ] as $category) {
-								$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
+							$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
 
-								// If WPML is installed, return the translated ID
-								if ( function_exists( 'icl_object_id' ) )
-									$term_id = icl_object_id( $term_id, $taxonomy, true );
+							// If WPML is installed, return the translated ID
+							if ( function_exists( 'icl_object_id' ) )
+								$term_id = icl_object_id( $term_id, $taxonomy, true );
 
-								$this->cat_list .= $term_id . ',';
+							$this->cat_list[$taxonomy] .= $term_id . ',';
 						}
-						
+
 					}
 
-					$this->cat_filters( $this->cat_list );
+					$this->cat_filters( $this->cat_list[$taxonomy],$taxonomy );
 				}
 			}
 		}
-		
 	}
 
 	/**
@@ -659,22 +669,21 @@ class RestrictTaxonomies{
 	 * @since 1.0
 	 * @global $cat_list string The global comma-separated list of restricted categories.
 	 */
-	public function cat_filters( $categories ){
+	public function cat_filters( $categories, $t ){
 		// Clean up the category list
-		$this->cat_list = rtrim( $categories, ',' );
+		$this->cat_list[$t] = rtrim( $categories, ',' );
 		// If there are no categories, don't do anything
-		if ( empty( $this->cat_list ) )
+		if ( empty( $this->cat_list[$t] ) )
 			return;
 
 		global $pagenow;
 		$frontOptions = get_option('RestrictTaxs_general_options');
 		// Only restrict the posts query if we're on the Posts screen
 		if ( $pagenow == 'edit.php' || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) || (isset($frontOptions['frontend']) && $frontOptions['frontend']))
-			add_filter( 'pre_get_posts', array( &$this, 'posts_query' ) );
+			add_filter( 'pre_get_posts', array( &$this, 'posts_query' ),9999 );
 
 		// Allowed pages for term exclusions
 		$pages = array( 'edit.php', 'post-new.php', 'post.php' );
-
 		$options = get_option('RestrictTaxs_post_type_options');
 		// Make sure to exclude terms from $pages array as well as the Category screen
 		if ((isset($frontOptions['frontend']) && $frontOptions['frontend']) || in_array( $pagenow, $pages ) || ( $pagenow == 'edit-tags.php' && in_array($_GET['taxonomy'],$options['taxonomies']) ) || ( defined ( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) )
@@ -691,24 +700,35 @@ class RestrictTaxonomies{
 	 * @return $query array Sets 'category__in' query_var with an array of category IDs
 	 */
 	public function posts_query( $query ){
-		if ( $this->cat_list !== '' ) {
-			// Build an array for the categories
-			$cat_list_array = explode( ',', $this->cat_list );
+		if ( count($this->cat_list) > 0) {
 			// Make sure the posts are removed by default or if filter category is ran
 			$taxs = get_object_taxonomies( $this->get_current_post_type(), 'names' );
 
 			$taxquery = array(
-		        'relation'	=>	'OR'
-		    );
-		    foreach ($taxs as $taxonomy) {
-		    	$taxquery[] = array(
-		            'taxonomy' => $taxonomy,
-		            'field' => 'id',
-		            'terms' => $cat_list_array ,
-		            'operator'=> 'IN'
-		        );
-		    }
-			$query->set( 'tax_query', $taxquery );
+				'relation'	=>	'OR'
+			);
+			foreach ($taxs as $taxonomy) {
+				if(!empty($this->cat_list[$taxonomy])){
+					$larray = explode( ',', $this->cat_list[$taxonomy] );
+					$taxquery[] = array(
+						'taxonomy' => $taxonomy,
+						'field' => 'term_id',
+						'terms' => $larray ,
+						'operator'=> 'IN'
+					);
+				}
+			}
+
+			// Get original tax_query with AND relation
+			$combined_taxquery[] = array(
+				'relation' => 'AND',
+				$query->tax_query
+			);
+			
+			// Combine it with restritct-taxonomies tax_query
+			$combined_taxquery[] = $taxquery;
+			$query->set( 'tax_query', $combined_taxquery );
+			
 		}
 
 		return $query;
@@ -728,8 +748,19 @@ class RestrictTaxonomies{
 		foreach ($options['taxonomies'] as $value) {
 			$str.= "'".$value."',";
 		}
+		$str_cats = "";
+		foreach($this->cat_list as $tax=>$list){
+			$str_cats .= $list.",";
+		}
 		$str = rtrim($str, ",");
-		$excluded = " AND ( t.term_id IN ( $this->cat_list ) OR tt.taxonomy NOT IN ( $str ) )";
+		$str_cats = rtrim($str_cats,",");
+
+		//If there is no posts in the allowed categories, don't display any
+		if(!empty($str_cats))
+			$excluded = " AND ( t.term_id IN ( $str_cats ) OR tt.taxonomy NOT IN ( $str ) )";
+		else
+			$excluded = " AND t.term_id = 0";
+
 		return $excluded;
 	}
 }
@@ -779,7 +810,7 @@ class RestrictTaxs_User_Role_Boxes {
 
 		// Display pagination
 		echo '<div class="tablenav">';
-			$this->pagination( 'top' );
+		$this->pagination( 'top' );
 		echo '<br class="clear" /></div>';
 
 		// Loop through each role and build the checkboxes
@@ -814,66 +845,66 @@ class RestrictTaxs_User_Role_Boxes {
 			// Check which checkbox tab is selected
 			if ( isset( $_REQUEST[ $id . '-tab' ] ) && in_array( $_REQUEST[ $id . '-tab' ], array( 'all', 'popular' ) ) )
 				$current_tab = $_REQUEST[ $id . '-tab' ];
-		?>
+			?>
 			<div id="side-sortables" class="metabox-holder" style="float:left; padding:5px;">
 				<div class="postbox">
 					<h3 class="hndle"><span><?php echo $value['name']; ?></span></h3>
 
-	                <div class="inside" style="padding:0 10px;">
+					<div class="inside" style="padding:0 10px;">
 						<div class="taxonomydiv">
-	                    	<ul id="taxonomy-category-tabs" class="taxonomy-tabs add-menu-item-tabs">
-	                        	<li<?php echo ( 'all' == $current_tab ? ' class="tabs"' : '' ); ?>><a href="<?php echo add_query_arg( $id . '-tab', 'all', $roles_tab ); ?>" class="nav-tab-link">View All</a></li>
-	                            <li<?php echo ( 'popular' == $current_tab ? ' class="tabs"' : '' ); ?>><a href="<?php echo $users_tab; ?>" class="nav-tab-link">Most Used</a></li>
-	                        </ul>
+							<ul id="taxonomy-category-tabs" class="taxonomy-tabs add-menu-item-tabs">
+								<li<?php echo ( 'all' == $current_tab ? ' class="tabs"' : '' ); ?>><a href="<?php echo add_query_arg( $id . '-tab', 'all', $roles_tab ); ?>" class="nav-tab-link">View All</a></li>
+								<li<?php echo ( 'popular' == $current_tab ? ' class="tabs"' : '' ); ?>><a href="<?php echo $users_tab; ?>" class="nav-tab-link">Most Used</a></li>
+							</ul>
 							<div id="<?php echo $id; ?>-all" class="tabs-panel <?php echo ( 'all' == $current_tab ? 'tabs-panel-active' : 'tabs-panel-inactive' ); ?>">
 								<ul class="categorychecklist form-no-clear">
-								<?php
+									<?php
 									wp_list_categories(
 										array(
-										'admin'          => $id,
-										'selected_cats'  => $selected,
-										'options_name'   => $options_name,
-										'hide_empty'     => 0,
-										'title_li'       => '',
-										'disabled'       => ( 'all' == $current_tab ? false : true ),
-										'walker'         => $walker,
-										'taxonomy'		 => $taxonomy
+											'admin'          => $id,
+											'selected_cats'  => $selected,
+											'options_name'   => $options_name,
+											'hide_empty'     => 0,
+											'title_li'       => '',
+											'disabled'       => ( 'all' == $current_tab ? false : true ),
+											'walker'         => $walker,
+											'taxonomy'		 => $taxonomy
 										)
 									);
 
 									$disable_checkbox = ( 'all' == $current_tab ) ? '' : 'disabled="disabled"';
-								?>
-	                            <input style="display:none;" <?php echo $disable_checkbox; ?> type="checkbox" value="RestrictCategoriesDefault" checked="checked" name="<?php echo $options_name; ?>[<?php echo $id; ?>][]">
+									?>
+									<input style="display:none;" <?php echo $disable_checkbox; ?> type="checkbox" value="RestrictCategoriesDefault" checked="checked" name="<?php echo $options_name; ?>[<?php echo $id; ?>][]">
 								</ul>
 							</div>
-	                        <div id="<?php echo $id; ?>-popular" class="tabs-panel <?php echo ( 'popular' == $current_tab ? 'tabs-panel-active' : 'tabs-panel-inactive' ); ?>">
-	                        	<ul class="categorychecklist form-no-clear">
-								<?php
+							<div id="<?php echo $id; ?>-popular" class="tabs-panel <?php echo ( 'popular' == $current_tab ? 'tabs-panel-active' : 'tabs-panel-inactive' ); ?>">
+								<ul class="categorychecklist form-no-clear">
+									<?php
 									wp_list_categories(
 										array(
-										'admin'          => $id,
-										'selected_cats'  => $selected,
-										'options_name'   => $options_name,
-										'hide_empty'     => 0,
-										'title_li'       => '',
-										'orderby'        => 'count',
-										'order'          => 'DESC',
-										'disabled'       => ( 'popular' == $current_tab ? false : true ),
-										'walker'         => $walker,
-										'taxonomy'		 => $taxonomy
+											'admin'          => $id,
+											'selected_cats'  => $selected,
+											'options_name'   => $options_name,
+											'hide_empty'     => 0,
+											'title_li'       => '',
+											'orderby'        => 'count',
+											'order'          => 'DESC',
+											'disabled'       => ( 'popular' == $current_tab ? false : true ),
+											'walker'         => $walker,
+											'taxonomy'		 => $taxonomy
 										)
 									);
 
 									$disable_checkbox = ( 'popular' == $current_tab ) ? '' : 'disabled="disabled"';
-								?>
-	                            <input style="display:none;" <?php echo $disable_checkbox; ?> type="checkbox" value="RestrictCategoriesDefault" checked="checked" name="<?php echo $options_name; ?>[<?php echo $id; ?>][]">
+									?>
+									<input style="display:none;" <?php echo $disable_checkbox; ?> type="checkbox" value="RestrictCategoriesDefault" checked="checked" name="<?php echo $options_name; ?>[<?php echo $id; ?>][]">
 								</ul>
 							</div>
 						</div>
 
-	                    <?php
-							$shift_default = array_diff( $selected, array( 'RestrictCategoriesDefault' ) );
-							$selected = array_values( $shift_default );
+						<?php
+						$shift_default = array_diff( $selected, array( 'RestrictCategoriesDefault' ) );
+						$selected = array_values( $shift_default );
 						?>
 						<p style="padding-left:10px;">
 							<strong><?php echo count( $selected ); ?></strong> <?php echo ( count( $selected ) > 1 || count( $selected ) == 0 ) ? 'categories' : 'category'; ?> selected
@@ -885,7 +916,7 @@ class RestrictTaxs_User_Role_Boxes {
 					</div>
 				</div>
 			</div>
-		<?php
+			<?php
 		endforeach;
 	}
 

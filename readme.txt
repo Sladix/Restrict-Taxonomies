@@ -3,8 +3,8 @@ Contributors: sladix, mmuro
 Tags: restrict, admin, administration, cms, categories, category, taxonomies, taxonomy
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=sladix%40gmail%2ecom&lc=FR&item_name=Sladix&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
 Requires at least: 3.1
-Tested up to: 4.3.1
-Stable tag: 1.2.8
+Tested up to: 4.4.2
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ This plugin restrict the taxonomies terms that users can view, add, and edit in 
 
 == Description ==
 
-Based on the Restrict Categories plugin, this plugin allows you to restrict the taxonomies terms that users or roles can use when they publish content.
+Based on the Restrict Categories plugin, this plugin allows you to restrict the taxonomies terms that users or roles can use when they publish content. It also provide front end restriction for non logged users.
 
 == Installation ==
 
@@ -20,6 +20,7 @@ Based on the Restrict Categories plugin, this plugin allows you to restrict the 
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Configure the plugin in Settings > Restrict Taxonomies
 1. Choose the taxonomies *AND* the corresponding post types
+1. Activate (or don't, as you wish) the front end rescrictions
 
 == Frequently Asked Questions ==
 
@@ -33,7 +34,19 @@ Yes, the page post type will always be handled, therefore, it doesn't appear in 
 3. Select the categories allowed for a role or a user (note that user options override role options)
 4. Should the plugin restrict taxonomies in the front end ?
 
+== ToDo List ==
+1. Prevent the user from accessing the single view of a CPT that is in a disallowed taxonomy
+
 == Changelog ==
+
+= 1.3.0 =
+* Fixed warnings on the plugin activation thanks to Gavin
+* Fixed bug when only a empty taxonomy is allowed
+
+= 1.2.9 =
+* Added support for the latest vession of Geodirectory
+* Fixed a bug that occurs when multiples CPT and taxonomies are on a same page
+* Code clean up
 
 = 1.2.8 =
 * Added Dokan Dashboard support
