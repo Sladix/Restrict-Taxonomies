@@ -342,9 +342,28 @@ class RestrictTaxonomies{
 		{
 			case 'RestrictTaxs_user_options' :
 				$options = get_option( 'RestrictTaxs_user_options' );
+				// Replace options with new values
+				$replacements = array_replace_recursive( $options, $input );			
+				// Fix restrictions (duplicate RestrictCategoriesDefault)
+				foreach ( $replacements as $tax => $replace ) {
+					foreach ( $replace as $user => $restrictions ) {
+						$input[$tax][$user] = array_unique( $restrictions );
+					}
+				}
 				break;
 			case 'RestrictTaxs_options' :
 				$options = get_option( 'RestrictTaxs_options' );
+				// Replace options with new values
+				$replacements = array_replace_recursive( $options, $input );			
+				// Fix restrictions (duplicate RestrictCategoriesDefault)
+				foreach ( $replacements as $tax => $replace ) {
+					foreach ( $replace as $role => $restrictions ) {
+						$input[$tax][$role] = array_unique( $restrictions );
+					}
+				}
+				break;
+			case 'RestrictTaxs_general_options' :
+				$options = get_option( 'RestrictTaxs_general_options' );
 				break;
 			case 'RestrictTaxs_post_type_options' :
 				$options = get_option( 'RestrictTaxs_post_type_options' );
