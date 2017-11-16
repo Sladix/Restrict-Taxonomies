@@ -4,11 +4,7 @@ Plugin Name: Restrict Taxonomies
 Description: Based on Restrict Categories, restrict the taxonomies terms that users can view, add, and edit in the admin panel.
 Author: Sladix
 Author URI: https://twitter.com/sladix
-<<<<<<< HEAD
 Version: 1.3.1
-=======
-Version: 1.3.0
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 */
 
 /*
@@ -35,6 +31,8 @@ class RestrictTaxonomies{
 	private $cat_list = NULL;
 
 	private $user_query;
+
+	private $reseting = false;
 
 	public function __construct(){
 		// Make sure we are in the admin before proceeding.
@@ -168,11 +166,12 @@ class RestrictTaxonomies{
 				'post_types'	=>	array('post'),
 				'taxonomies'	=>	array('category')
 			);
+
+			$this->reseting = true;
 			// Reset Roles and Users options
 			update_option( 'RestrictTaxs_options', array() );
 			update_option( 'RestrictTaxs_user_options', array() );
 			update_option( 'RestrictTaxs_post_type_options', $defaultsPt );
-
 		endif;
 	}
 
@@ -366,50 +365,27 @@ class RestrictTaxonomies{
 	 * @return $input array Returns array of input if available
 	 */
 	public function options_sanitize( $input ){
-
-		$switch = ( isset( $_REQUEST['option_page'] ) ) ? $_REQUEST['option_page'] : null;
-
-		switch( $switch )
-		{
-			case 'RestrictTaxs_user_options' :
-				$options = get_option( 'RestrictTaxs_user_options' );
-				// Replace options with new values
-				$replacements = array_replace_recursive( $options, $input );			
-				// Fix restrictions (duplicate RestrictCategoriesDefault)
-				foreach ( $replacements as $tax => $replace ) {
-					foreach ( $replace as $user => $restrictions ) {
-						$input[$tax][$user] = array_unique( $restrictions );
-					}
-				}
-				break;
-			case 'RestrictTaxs_options' :
-				$options = get_option( 'RestrictTaxs_options' );
-				// Replace options with new values
-				$replacements = array_replace_recursive( $options, $input );			
-				// Fix restrictions (duplicate RestrictCategoriesDefault)
-				foreach ( $replacements as $tax => $replace ) {
-					foreach ( $replace as $role => $restrictions ) {
-						$input[$tax][$role] = array_unique( $restrictions );
-					}
-				}
-				break;
-			case 'RestrictTaxs_general_options' :
-				$options = get_option( 'RestrictTaxs_general_options' );
-				break;
-			case 'RestrictTaxs_post_type_options' :
-				$options = get_option( 'RestrictTaxs_post_type_options' );
-				break;
-			default :
-				$options = $input;
-				break;
-		}
-
-		if ( is_array( $input ) ) {
-			foreach( $input as $k => $v ) {
-				$options[ $k ] = $v;
+		if(!$this->reseting){
+			if ( !isset( $_REQUEST['option_page'] ) )
+				return;
+			switch($_REQUEST['option_page'])
+			{
+				case 'RestrictTaxs_user_options' :
+					$options = get_option( 'RestrictTaxs_user_options' );
+					break;
+				case 'RestrictTaxs_options' :
+					$options = get_option( 'RestrictTaxs_options' );
+					break;
+				default :
+					$options = get_option( 'RestrictTaxs_post_type_options' );
+					break;
 			}
+		}else{
+			$options = array();
 		}
-
+		if(is_array($input)){
+			$options = array_merge_recursive($options,$input);
+		}
 		return $options;
 	}
 
@@ -508,7 +484,6 @@ class RestrictTaxonomies{
 			$boxes = new RestrictTaxs_User_Role_Boxes();
 
 			if ( $tab == 'roles' ) :
-<<<<<<< HEAD
 
 				$rc_options = $this->populate_opts();
 
@@ -532,31 +507,6 @@ class RestrictTaxonomies{
 				<?php
 			elseif ( $tab == 'users' ) :
 
-=======
-
-				$rc_options = $this->populate_opts();
-
-				?>
-				<form method="post" action="options.php">
-
-					<?php
-					settings_fields( 'RestrictTaxs_options' );
-					foreach ($options['taxonomies'] as $tax) {
-						$t = get_taxonomy( $tax );
-						echo "<fieldset>";
-						echo "<h3>".$t->labels->name."</h3>";
-						// Create boxes for Roles
-						$boxes->start_box( get_option( 'RestrictTaxs_options' ), $rc_options, 'RestrictTaxs_options['.$tax.']', $tax );
-						echo "</fieldset>";
-					}
-					?>
-
-					<?php submit_button(); ?>
-				</form>
-				<?php
-			elseif ( $tab == 'users' ) :
-
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 				$rc_user_options = $this->populate_user_opts();
 				?>
 				<form method="post" action="options-general.php?page=restrict-taxonomies&type=users">
@@ -577,11 +527,7 @@ class RestrictTaxonomies{
 						echo "<fieldset>";
 						echo "<h3>".$t->labels->name."</h3>";
 						// Create boxes for Users
-<<<<<<< HEAD
 						$boxes->start_box( get_option( 'RestrictTaxs_user_options' ), $rc_user_options, 'RestrictTaxs_user_options['.$tax.']',$tax, $this->user_query->total_users );
-=======
-						$boxes->start_box( get_option( 'RestrictTaxs_user_options' ), $rc_user_options, 'RestrictTaxs_user_options['.$tax.']',$tax );
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 						echo "</fieldset>";
 					}
 					?>
@@ -698,19 +644,15 @@ class RestrictTaxonomies{
 		$this->cat_list = array();
 		foreach ($lestax as $taxonomy) {
 			// For users, strip out the placeholder category, which is only used to make sure the checkboxes work
-			if ( is_array( $settings_user ) && array_key_exists( $taxonomy, $settings_user ) )
+			if ( is_array( $settings_user ) && array_key_exists( $taxonomy, $settings_user ) && array_key_exists( $user_login . '_user_cats', $settings_user[$taxonomy] ) )
 				$settings_user[$taxonomy][ $user_login . '_user_cats' ] = array_values( array_diff( $settings_user[$taxonomy][ $user_login . '_user_cats' ], $defaults ) );
 			if(!isset($this->cat_list[$taxonomy]))
 				$this->cat_list[$taxonomy] = '';
 			// Selected categories for User overwrites Roles selection
-			if ( is_array( $settings_user ) && is_array($settings_user[$taxonomy]) &&!empty( $settings_user[$taxonomy][ $user_login . '_user_cats' ] ) ) {
+			if ( is_array( $settings_user ) && array_key_exists( $taxonomy, $settings_user ) && array_key_exists( $user_login . '_user_cats', $settings_user[$taxonomy] ) ) {
 				// Build the category list
 				foreach ($settings_user[$taxonomy][ $user_login . '_user_cats' ] as $category) {
-<<<<<<< HEAD
 					$term_id = get_term_by( 'slug', $category, $taxonomy )->term_id;
-=======
-					$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 
 					// If WPML is installed, return the translated ID
 					if ( function_exists( 'icl_object_id' ) )
@@ -718,28 +660,20 @@ class RestrictTaxonomies{
 
 					$this->cat_list[$taxonomy] .= $term_id . ',';
 				}
-<<<<<<< HEAD
 
 
-=======
-				
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 				$this->cat_filters( $this->cat_list[$taxonomy],$taxonomy );
 			}
 			else {
 				foreach ( $user_cap as $key ) {
 					// Make sure the settings from the DB isn't empty before building the category list
-					if ( is_array( $settings ) && is_array($settings[$taxonomy]) && !empty( $settings[$taxonomy][ $key . '_cats' ] ) ) {
+					if ( is_array( $settings ) && array_key_exists( $taxonomy,$settings ) && array_key_exists( $key . '_cats', $settings_user[$taxonomy] ) ) {
 						// Strip out the placeholder category, which is only used to make sure the checkboxes work
 						$settings[$taxonomy][ $key . '_cats' ] = array_values( array_diff( $settings[$taxonomy][ $key . '_cats' ], $defaults ) );
 
 						// Build the category list
 						foreach ($settings[$taxonomy][ $key . '_cats' ] as $category) {
-<<<<<<< HEAD
 							$term_id = get_term_by( 'slug', $category, $taxonomy )->term_id;
-=======
-							$term_id = get_term_by( 'id', $category, $taxonomy )->term_id;
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 
 							// If WPML is installed, return the translated ID
 							if ( function_exists( 'icl_object_id' ) )
@@ -754,11 +688,8 @@ class RestrictTaxonomies{
 				}
 			}
 		}
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 	}
 
 	/**
@@ -809,31 +740,13 @@ class RestrictTaxonomies{
 					$larray = explode( ',', $this->cat_list[$taxonomy] );
 					$taxquery[] = array(
 						'taxonomy' => $taxonomy,
-<<<<<<< HEAD
 						'field' => 'id',
-=======
-						'field' => 'term_id',
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 						'terms' => $larray ,
 						'operator'=> 'IN'
 					);
 				}
 			}
-<<<<<<< HEAD
 			$query->set( 'tax_query', $taxquery );
-=======
-
-			// Get original tax_query with AND relation
-			$combined_taxquery[] = array(
-				'relation' => 'AND',
-				$query->tax_query
-			);
-			
-			// Combine it with restritct-taxonomies tax_query
-			$combined_taxquery[] = $taxquery;
-			$query->set( 'tax_query', $combined_taxquery );
-			
->>>>>>> 314ca1b89327e767f0c40dda7bf0a02b26438607
 		}
 
 		return $query;
@@ -902,9 +815,6 @@ class RestrictTaxs_User_Role_Boxes {
 
 		// How many do we have?
 		$total_items = ($totalCount !== false)?$totalCount:count( $options );
-
-		// Calculate pagination
-		//$options = array_slice( $options, ( ( $current_page - 1 ) * $per_page ), $per_page );
 
 		// Register our pagination
 		$this->set_pagination_args( array(
@@ -1191,11 +1101,12 @@ class RestrictTaxs_Walker_Category_Checklist extends Walker {
 			$taxonomy = 'category';
 
 		$output .= sprintf(
-			'<li id="%3$s-category-%1$d"><label class="selectit"><input value="%1$s" type="checkbox" name="%2$s[%3$s][]" %4$s %5$s /> %6$s</label>',
+			'<li id="%4$s-category-%1$d"><label class="selectit"><input value="%2$s" type="checkbox" name="%3$s[%4$s][]" %5$s %6$s /> %7$s</label>',
 			$category->term_id,
+			$category->slug,
 			$options_name,
 			$admin,
-			checked( in_array( $category->term_id, $selected_cats ), true, false ),
+			checked( in_array( $category->slug, $selected_cats ), true, false ),
 			( $disabled === true ? 'disabled="disabled"' : '' ),
 			esc_html( apply_filters( 'the_category', $category->name ) )
 		);
