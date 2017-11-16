@@ -384,7 +384,7 @@ class RestrictTaxonomies{
 			$options = array();
 		}
 		if(is_array($input)){
-			$options = array_merge_recursive($options,$input);
+			$options = array_replace_recursive($options,$input);
 		}
 		return $options;
 	}
