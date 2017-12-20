@@ -667,7 +667,7 @@ class RestrictTaxonomies{
 			else {
 				foreach ( $user_cap as $key ) {
 					// Make sure the settings from the DB isn't empty before building the category list
-					if ( is_array( $settings ) && array_key_exists( $taxonomy,$settings ) && array_key_exists( $key . '_cats', $settings_user[$taxonomy] ) ) {
+					if ( is_array( $settings ) && array_key_exists( $taxonomy,$settings ) && array_key_exists( $key . '_cats', $settings[$taxonomy] ) ) {
 						// Strip out the placeholder category, which is only used to make sure the checkboxes work
 						$settings[$taxonomy][ $key . '_cats' ] = array_values( array_diff( $settings[$taxonomy][ $key . '_cats' ], $defaults ) );
 
