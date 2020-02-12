@@ -1,3 +1,5 @@
+/!\ This plugin is not maintained anymore, feel free to fork it and make it compatible with the latest WP version
+
 # Restrict-Taxonomies
 Wordpress Plugin based on Restrict Categories, works with custom taxonomies
 
